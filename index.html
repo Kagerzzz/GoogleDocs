@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Notepad</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    /* Wrapper chứa iframe + các overlay */
+    .wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Overlay che sidebar trái */
+    .cover-sidebar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 275px;   /* đủ che sidebar ~270px */
+      height: 100%;
+      background: #fff;
+      z-index: 10;
+    }
+
+    /* Overlay che footer dưới */
+    .cover-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;   /* đủ che footer ~50px */
+      background: #fff;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <iframe
+      src="https://docs.google.com/document/d/1CYirZ0IfiJJthv0IdSNhubInJOyBA2oKGxqNueJjn8k/edit?tab=t.5flhlpkf0qn"
+      allowfullscreen
+    ></iframe>
+
+    <!-- Che sidebar trái -->
+    <div class="cover-sidebar"></div>
+
+    <!-- Che footer dưới -->
+    <div class="cover-footer"></div>
+  </div>
+</body>
+</html>
