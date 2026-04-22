@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <script>
+    // GitHub Pages 404 trick: redirect về tab/index.html với slug trong URL
+    var path = window.location.pathname;
+    // path dạng /GoogleDocs/tab/ten-slug
+    var parts = path.split('/');
+    var slug = parts[parts.length - 1];
+    if (slug) {
+      window.location.replace('/GoogleDocs/tab/?slug=' + slug);
+    } else {
+      window.location.replace('/GoogleDocs/');
+    }
+  </script>
+</head>
+<body></body>
+</html>
