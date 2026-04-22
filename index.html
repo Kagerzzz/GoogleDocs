@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Notepad</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #f0f4f9;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .viewport {
+      width: 816px;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: calc(100vh + 145px);
+      border: none;
+      transform: translate(-533px, -145px);
+      transform-origin: top left;
+      pointer-events: auto;
+    }
+
+    .cover-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      background: #f0f4f9;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: sans-serif;
+      color: #666;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport" id="viewport">
+    <div class="cover-bottom"></div>
+  </div>
+
+  <script>
+    const BASE_DOC = 'https://docs.google.com/document/d/1CYirZ0IfiJJthv0IdSNhubInJOyBA2oKGxqNueJjn8k/edit';
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+
+    const viewport = document.getElementById('viewport');
+
+    if (!tab) {
+      viewport.innerHTML = '<div class="error">Không tìm thấy tab. Vui lòng kiểm tra lại liên kết.</div>';
+    } else {
+      const iframe = document.createElement('iframe');
+      iframe.src = BASE_DOC + '?tab=' + tab;
+      iframe.allowFullscreen = true;
+      viewport.insertBefore(iframe, viewport.firstChild);
+    }
+  </script>
+</body>
+</html>
