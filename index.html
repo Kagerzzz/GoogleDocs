@@ -1,84 +1,644 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Notepad</title>
+  <title>Docs Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --accent: #4a9eff;
+      --accent-dim: rgba(74,158,255,0.12);
+      --text: #e8e8e8;
+      --muted: #666;
+      --success: #3ecf8e;
+      --danger: #ff4d4d;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      background: #f0f4f9;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      overflow: hidden;
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
     }
 
-    .viewport {
-      width: 816px;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 1920px;
-      height: calc(100vh + 145px);
-      border: none;
-      transform: translate(-533px, -145px);
-      transform-origin: top left;
-      pointer-events: auto;
-    }
-
-    .cover-bottom {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 52px;
-      background: #f0f4f9;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .error {
+    /* ── LOGIN ── */
+    #login-screen {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      font-family: sans-serif;
-      color: #666;
-      font-size: 16px;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 32px;
+    }
+
+    .login-card h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
+
+    .pin-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .pin-input {
+      width: 56px;
+      height: 64px;
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 24px;
+      font-family: 'DM Mono', monospace;
+      text-align: center;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .pin-input:focus { border-color: var(--accent); }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn:hover { opacity: 0.88; }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-danger {
+      background: rgba(255,77,77,0.12);
+      border: 1px solid rgba(255,77,77,0.3);
+      color: var(--danger);
+    }
+    .btn-sm {
+      width: auto;
+      padding: 7px 14px;
+      font-size: 12px;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 12px;
+      text-align: center;
+      margin-top: 12px;
+      min-height: 18px;
+    }
+
+    /* ── MAIN APP ── */
+    #app { display: none; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+
+    .topbar-brand {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-brand span {
+      color: var(--accent);
+    }
+
+    .topbar-actions { display: flex; gap: 10px; }
+
+    .main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* ── ADD LINK FORM ── */
+    .section-title {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 16px;
+    }
+
+    .add-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 8px;
+    }
+
+    .field input, .field textarea {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'DM Mono', monospace;
+      outline: none;
+      transition: border 0.2s;
+      resize: none;
+    }
+
+    .field input:focus, .field textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .field .hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── RESULT BOX ── */
+    .result-box {
+      background: rgba(62,207,142,0.06);
+      border: 1px solid rgba(62,207,142,0.25);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 16px;
+      display: none;
+      animation: fadeUp 0.3s ease;
+    }
+
+    .result-box .result-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--success);
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 8px;
+    }
+
+    .result-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: #a0ffcf;
+      word-break: break-all;
+      margin-bottom: 12px;
+    }
+
+    /* ── LINKS TABLE ── */
+    .links-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .link-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border 0.2s;
+    }
+
+    .link-item:hover { border-color: #3a3a3a; }
+
+    .link-item-info { flex: 1; min-width: 0; }
+
+    .link-slug {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .link-url {
+      font-size: 12px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .link-date {
+      font-size: 11px;
+      color: #444;
+      margin-top: 4px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .link-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 24px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .modal h2 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .modal p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .modal .field { margin-bottom: 16px; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #222;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 300;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
     }
   </style>
 </head>
 <body>
-  <div class="viewport" id="viewport">
-    <div class="cover-bottom"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Docs Manager</h1>
+    <p>Nhập mật khẩu để tiếp tục</p>
+    <div class="pin-row">
+      <input class="pin-input" maxlength="1" type="password" inputmode="numeric" id="p0"/>
+      <input class="pin-input" maxlength="1" type="password" inputmode="numeric" id="p1"/>
+      <input class="pin-input" maxlength="1" type="password" inputmode="numeric" id="p2"/>
+      <input class="pin-input" maxlength="1" type="password" inputmode="numeric" id="p3"/>
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">Đăng nhập</button>
+    <div class="error-msg" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">Docs <span>Manager</span></div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openChangePassword()">Đổi mật khẩu</button>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Đăng xuất</button>
+    </div>
   </div>
 
-  <script>
-    const BASE_DOC = 'https://docs.google.com/document/d/1CYirZ0IfiJJthv0IdSNhubInJOyBA2oKGxqNueJjn8k/edit';
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
+  <div class="main">
+    <!-- Form thêm link -->
+    <div class="section-title">Tạo link mới</div>
+    <div class="add-form">
+      <div class="form-row">
+        <div class="field">
+          <label>Slug (đường dẫn)</label>
+          <input type="text" id="input-slug" placeholder="vd: bao-cao-thang-4"/>
+          <div class="hint">Chỉ dùng chữ, số, - và _</div>
+        </div>
+        <div class="field">
+          <label>Link Google Docs Tab</label>
+          <input type="text" id="input-docs" placeholder="https://docs.google.com/...?tab=t.xxx"/>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="btn-add" onclick="addLink()" style="width:auto;padding:12px 28px;">
+        + Tạo link
+      </button>
+      <div class="result-box" id="result-box">
+        <div class="result-label">✓ Link đã tạo</div>
+        <div class="result-link" id="result-link"></div>
+        <button class="btn btn-ghost btn-sm" onclick="copyResult()">⎘ Sao chép</button>
+      </div>
+      <div class="error-msg" id="add-error"></div>
+    </div>
 
-    const viewport = document.getElementById('viewport');
+    <!-- Danh sách -->
+    <div class="section-title">Danh sách link</div>
+    <div id="links-container"><div class="loading">Đang tải...</div></div>
+  </div>
+</div>
 
-    if (!tab) {
-      viewport.innerHTML = '<div class="error">Không tìm thấy tab. Vui lòng kiểm tra lại liên kết.</div>';
-    } else {
-      const iframe = document.createElement('iframe');
-      iframe.src = BASE_DOC + '?tab=' + tab;
-      iframe.allowFullscreen = true;
-      viewport.insertBefore(iframe, viewport.firstChild);
+<!-- Modal đổi mật khẩu -->
+<div class="modal-overlay" id="modal-pw">
+  <div class="modal">
+    <h2>Đổi mật khẩu</h2>
+    <p>Nhập mật khẩu hiện tại và mật khẩu mới</p>
+    <div class="field">
+      <label>Mật khẩu hiện tại</label>
+      <input type="password" id="pw-old" inputmode="numeric"/>
+    </div>
+    <div class="field">
+      <label>Mật khẩu mới</label>
+      <input type="password" id="pw-new" inputmode="numeric"/>
+    </div>
+    <div class="error-msg" id="pw-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="doChangePassword()">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'https://script.google.com/macros/s/AKfycbyov_i3kq-x_Kl1DzAKf1tkPr_GEzIkbBOFouPgHA5T8nKJvEmkMlNhW8QCP34atnayCQ/exec';
+  const BASE = 'https://kagerzzz.github.io/GoogleDocs/tab/';
+  let SESSION_PW = '';
+
+  // ── PIN INPUT auto-advance ──
+  document.querySelectorAll('.pin-input').forEach((el, i, arr) => {
+    el.addEventListener('input', () => {
+      if (el.value && i < arr.length - 1) arr[i + 1].focus();
+      if (el.value.length > 1) el.value = el.value.slice(-1);
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !el.value && i > 0) arr[i - 1].focus();
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+
+  // ── API CALL ──
+  async function api(params) {
+    const url = new URL(API);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    const res = await fetch(url);
+    return res.json();
+  }
+
+  // ── LOGIN ──
+  async function doLogin() {
+    const pw = ['p0','p1','p2','p3'].map(id => document.getElementById(id).value).join('');
+    if (pw.length < 4) {
+      document.getElementById('login-error').textContent = 'Vui lòng nhập đủ 4 số';
+      return;
     }
-  </script>
+    document.getElementById('login-error').textContent = 'Đang kiểm tra...';
+    const res = await api({ action: 'checkPassword', password: pw });
+    if (res.success) {
+      SESSION_PW = pw;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadLinks();
+    } else {
+      document.getElementById('login-error').textContent = 'Sai mật khẩu, thử lại';
+      ['p0','p1','p2','p3'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('p0').focus();
+    }
+  }
+
+  function doLogout() {
+    SESSION_PW = '';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    ['p0','p1','p2','p3'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  // ── LOAD LINKS ──
+  async function loadLinks() {
+    document.getElementById('links-container').innerHTML = '<div class="loading">Đang tải...</div>';
+    const res = await api({ action: 'getLinks', password: SESSION_PW });
+    if (!res.success) { showToast('Lỗi tải dữ liệu'); return; }
+
+    const links = res.links;
+    if (!links.length) {
+      document.getElementById('links-container').innerHTML = '<div class="empty">Chưa có link nào. Tạo link đầu tiên bên trên!</div>';
+      return;
+    }
+
+    document.getElementById('links-container').innerHTML = `
+      <div class="links-list">
+        ${links.map(l => `
+          <div class="link-item">
+            <div class="link-item-info">
+              <div class="link-slug">/${l.slug}</div>
+              <div class="link-url">${l.docsUrl}</div>
+              <div class="link-date">${l.createdAt}</div>
+            </div>
+            <div class="link-actions">
+              <button class="btn btn-ghost btn-sm" onclick="copyLink('${BASE + l.slug}')">Copy</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteLink('${l.slug}')">Xóa</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // ── ADD LINK ──
+  async function addLink() {
+    const slug = document.getElementById('input-slug').value.trim();
+    const docsUrl = document.getElementById('input-docs').value.trim();
+    const errEl = document.getElementById('add-error');
+    const btn = document.getElementById('btn-add');
+
+    errEl.textContent = '';
+    document.getElementById('result-box').style.display = 'none';
+
+    if (!slug || !docsUrl) { errEl.textContent = 'Vui lòng điền đủ thông tin'; return; }
+
+    btn.innerHTML = '<span class="spinner"></span>Đang tạo...';
+    btn.disabled = true;
+
+    const res = await api({ action: 'addLink', password: SESSION_PW, slug, docsUrl });
+
+    btn.innerHTML = '+ Tạo link';
+    btn.disabled = false;
+
+    if (!res.success) { errEl.textContent = res.message; return; }
+
+    const shareLink = res.shareLink;
+    document.getElementById('result-link').textContent = shareLink;
+    document.getElementById('result-box').style.display = 'block';
+    document.getElementById('input-slug').value = '';
+    document.getElementById('input-docs').value = '';
+    loadLinks();
+  }
+
+  // ── DELETE ──
+  async function deleteLink(slug) {
+    if (!confirm(`Xóa link /${slug}?`)) return;
+    const res = await api({ action: 'deleteLink', password: SESSION_PW, slug });
+    if (res.success) { showToast('Đã xóa'); loadLinks(); }
+    else showToast('Lỗi: ' + res.message);
+  }
+
+  // ── COPY ──
+  function copyLink(url) {
+    navigator.clipboard.writeText(url);
+    showToast('Đã sao chép!');
+  }
+
+  function copyResult() {
+    const url = document.getElementById('result-link').textContent;
+    navigator.clipboard.writeText(url);
+    showToast('Đã sao chép!');
+  }
+
+  // ── CHANGE PASSWORD ──
+  function openChangePassword() {
+    document.getElementById('modal-pw').classList.add('open');
+    document.getElementById('pw-old').value = '';
+    document.getElementById('pw-new').value = '';
+    document.getElementById('pw-error').textContent = '';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-pw').classList.remove('open');
+  }
+
+  async function doChangePassword() {
+    const oldPw = document.getElementById('pw-old').value;
+    const newPw = document.getElementById('pw-new').value;
+    const errEl = document.getElementById('pw-error');
+
+    if (!oldPw || !newPw) { errEl.textContent = 'Vui lòng điền đủ'; return; }
+
+    const res = await api({ action: 'changePassword', oldPassword: oldPw, newPassword: newPw });
+    if (res.success) {
+      SESSION_PW = newPw;
+      closeModal();
+      showToast('Đổi mật khẩu thành công!');
+    } else {
+      errEl.textContent = res.message;
+    }
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
 </body>
 </html>
