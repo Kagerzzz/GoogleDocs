@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loading...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #f0f4f9;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    .viewport {
+      width: 816px;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: calc(100vh + 145px);
+      border: none;
+      transform: translate(-533px, -145px);
+      transform-origin: top left;
+    }
+
+    .cover-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      background: #f0f4f9;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      gap: 12px;
+      color: #666;
+    }
+
+    .message .icon { font-size: 40px; }
+    .message .title { font-size: 18px; font-weight: 600; color: #333; }
+    .message .sub { font-size: 14px; }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #ddd;
+      border-top-color: #4a9eff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div id="root">
+  <div class="message">
+    <div class="spinner"></div>
+    <div class="sub">Đang tải...</div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://script.google.com/macros/s/AKfycbyov_i3kq-x_Kl1DzAKf1tkPr_GEzIkbBOFouPgHA5T8nKJvEmkMlNhW8QCP34atnayCQ/exec';
+  const BASE_DOC = 'https://docs.google.com/document/d/1CYirZ0IfiJJthv0IdSNhubInJOyBA2oKGxqNueJjn8k/edit';
+
+  // Lấy slug từ path: /tab/ten-slug
+  const pathParts = window.location.pathname.split('/');
+  const slug = pathParts[pathParts.length - 1];
+
+  async function loadDoc() {
+    if (!slug) {
+      showError('Không tìm thấy slug trong URL');
+      return;
+    }
+
+    try {
+      const url = new URL(API);
+      // Dùng password rỗng — getLinks public read bằng slug không cần pw
+      // Thay vào đó ta dùng action riêng getTab
+      url.searchParams.set('action', 'getTab');
+      url.searchParams.set('slug', slug);
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.success) {
+        showError('Không tìm thấy trang này', 'Link có thể đã bị xóa hoặc không tồn tại.');
+        return;
+      }
+
+      // Ghép URL iframe
+      const tabParam = data.tabParam;
+      const iframeSrc = BASE_DOC + '?tab=' + tabParam;
+
+      document.getElementById('root').innerHTML = `
+        <div class="viewport">
+          <iframe src="${iframeSrc}" allowfullscreen></iframe>
+          <div class="cover-bottom"></div>
+        </div>
+      `;
+
+      document.title = data.slug || 'Docs';
+
+    } catch (e) {
+      showError('Lỗi kết nối', 'Vui lòng thử lại sau.');
+    }
+  }
+
+  function showError(title, sub) {
+    document.getElementById('root').innerHTML = `
+      <div class="message">
+        <div class="icon">📄</div>
+        <div class="title">${title}</div>
+        ${sub ? `<div class="sub">${sub}</div>` : ''}
+      </div>
+    `;
+  }
+
+  loadDoc();
+</script>
+</body>
+</html>
