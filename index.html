@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Notepad</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #f0f4f9;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /*
+      Khung hiển thị: đúng kích thước tờ giấy
+      Overflow hidden để clip những gì nằm ngoài
+    */
+    .viewport {
+      width: 816px;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /*
+      iframe to hơn viewport để Docs render đúng layout
+      Dịch chuyển:
+        - Trái: -505px (đẩy giấy vào sát mép trái của .viewport)
+        - Trên: -145px (bỏ toolbar)
+    */
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: calc(100vh + 145px);
+      border: none;
+      transform: translate(-505px, -145px);
+      transform-origin: top left;
+      pointer-events: auto;
+    }
+
+    /*
+      Che footer điều hướng cuối trang
+    */
+    .cover-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      background: #f0f4f9;
+      z-index: 10;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    <iframe
+      src="https://docs.google.com/document/d/1CYirZ0IfiJJthv0IdSNhubInJOyBA2oKGxqNueJjn8k/edit?tab=t.5flhlpkf0qn"
+      allowfullscreen
+    ></iframe>
+    <div class="cover-bottom"></div>
+  </div>
+</body>
+</html>
